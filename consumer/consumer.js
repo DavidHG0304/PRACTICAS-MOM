@@ -1,7 +1,7 @@
 const redis = require("redis");
 
 const client = redis.createClient({
-    url: "redis://192.168.1.90:6380" // IP SERVER
+    url: "redis://25.31.116.97:6380" // IP SERVER
 });
 
 client.connect().then(() => console.log("Cocina lista"));

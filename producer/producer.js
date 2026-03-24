@@ -7,10 +7,27 @@ app.use(express.json());
 app.use(cors());
 
 const client = redis.createClient({
-    url: "redis://192.168.1.90:6380"
+    url: "redis://25.31.116.97:6380" // IP
 });
 
-client.connect().then(() => console.log("🟢 Conectado a Redis"));
+const subscriber = client.duplicate();
+
+async function start() {
+    await client.connect();
+    await subscriber.connect();
+
+    console.log("Conectado a Redis");
+
+    subscriber.subscribe("ordersReady", (message) => {
+        const data = JSON.parse(message);
+
+        console.log("\n===============================");
+        console.log(`Pedido listo para ${data.cliente}: ${data.platillo}`);
+        console.log("===============================\n");
+    });
+}
+
+start();
 
 app.post("/order", async (req, res) => {
     const { orders } = req.body;
@@ -48,6 +65,16 @@ app.get("/orders", async (req, res) => {
     }
 });
 
+app.get("/ready", async (req, res) => {
+    try {
+        const orders = await client.lRange("ordersReadyList", 0, -1);
+        const parsed = orders.map(o => JSON.parse(o));
+        res.json(parsed);
+    } catch (err) {
+        res.status(500).send("Error al obtener pedidos listos");
+    }
+});
+
 app.listen(4000, "0.0.0.0", () => {
-    console.log("🚀 Servidor corriendo en puerto 4000");
+    console.log("Servidor corriendo en puerto 4000");
 });

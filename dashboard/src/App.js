@@ -186,7 +186,7 @@ function App() {
 
   useEffect(() => {
     const fetchOrders = () => {
-      fetch("http://192.168.1.90:4000/orders")
+      fetch("http://25.31.116.97:4000/orders")
         .then(res => res.json())
         .then(data => setOrders(data))
         .catch(() => {});
